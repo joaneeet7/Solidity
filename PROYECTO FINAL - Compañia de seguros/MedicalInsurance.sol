@@ -70,13 +70,13 @@ contract InsuranceFactory is OperacionesBasicas{
         
         // Funcion para ejecutar una PCR o una RX por un asegurado en un laboratorio
         function FuncionUnicamenteAsegurado(address _direccionAsegurado) public view{
-            require (MappingAsegurados[_direccionAsegurado].AutorizacionCliente == true, "Direccion no autorizada");
+            require (MappingAsegurados[_direccionAsegurado].AutorizacionCliente == true, "Direccion no autorizada.");
         }
         
         // Restricciones para que unicamente se ejecuten funciones por la compañia de seguros
         modifier UnicamenteAseguradora(address _direccionAsseguradora){
             // Es requreix que l'adreça de l'asseguradora sigui l'unicada autoritzada
-            require (Aseguradora == _direccionAsseguradora, "Adreça no autoritzada");
+            require (Aseguradora == _direccionAsseguradora, "Direccion no autorizada.");
             _;
         }
         
@@ -130,17 +130,17 @@ contract InsuranceFactory is OperacionesBasicas{
              emit AseguradoCreado(msg.sender,direccionAsegurado);
         }
         
-        // Función que devuelve el array de las direcciones de los laboratorios
+        // Funcion que devuelve el array de las direcciones de los laboratorios
         function Laboratorios() public view UnicamenteAseguradora(msg.sender) returns(address [] memory){
         return DireccionesLaboratorios;
         }
         
-        // Función que devuelve el array de las direcciones de los Asegurados
+        // Funcion que devuelve el array de las direcciones de los Asegurados
         function Asegurados() public view UnicamenteAseguradora(msg.sender) returns(address [] memory){
         return DireccionesAsegurados;
         }
         
-        // Función para ver el historial de un asegurado
+        // Funcion para ver el historial de un asegurado
         function consultarHistorialAsegurado(address _direccionAsegurado, address _direccionConsultor) public view Asegurado_o_Aseguradora(_direccionAsegurado, _direccionConsultor) returns(string memory){
             string memory historial = "";
             address direccionContratoAsegurado = MappingAsegurados[_direccionAsegurado].DireccionContrato;
@@ -157,14 +157,14 @@ contract InsuranceFactory is OperacionesBasicas{
         function darBajaCliente(address _direccionAsegurado) public UnicamenteAseguradora(msg.sender) returns (string memory){
             // La autorizacion del aseguradora se anula
             MappingAsegurados[_direccionAsegurado].AutorizacionCliente = false;
-            // Es crida al metode selfdestruct del client i es dona de baixa el client relacionat a l'adreça entrada per parametre
+            // Se llama al metodo self destruct del cliente y se da de baja el cliente relacionado a la dirección entrada para parametro
             InsuranceHealthRecord(MappingAsegurados[_direccionAsegurado].DireccionContrato).darBaja;
             // Emision del evento
             emit EventoBajaCliente(_direccionAsegurado);
         }
             
-        // Funció  per a la creació d'un nou servei de l'asseguradora
-        function nouServei(string memory _nombreServicio, uint256 _precioServicio) public UnicamenteAseguradora(msg.sender){
+        // Funcion para la creación de un nuevo servicio de la aseguradora
+        function nuevoServicio(string memory _nombreServicio, uint256 _precioServicio) public UnicamenteAseguradora(msg.sender){
             // Relacion con el nombre del nuevo servicio y la estructura definida del servicio (nombre, precio y estado)
             MappingServicios[_nombreServicio] = servicio(_nombreServicio,_precioServicio,true);
             // Se guarda el nombre del servicio en el array
@@ -173,7 +173,7 @@ contract InsuranceFactory is OperacionesBasicas{
             emit EventoNuevoServicio(_nombreServicio,_precioServicio);
         }
         
-        // L'asseguradora dona de baixa un servei donat d'alta anteriorment
+        // La aseguradora dar de baja un servicio dado de alta anteriormente
         function darBajaServicio(string memory _nombreServicio) public UnicamenteAseguradora(msg.sender){
             // El servicio debe haberse dado de alta antes para darlo de baja
             require(ServicioEstado(_nombreServicio) == true, "No se ha dado de alta el servicio.");
@@ -191,13 +191,13 @@ contract InsuranceFactory is OperacionesBasicas{
             return MappingServicios[_nombreServicio].precioTokensServicio;
         }
         
-        // Función para devolver el estado del servicio (puede ser: true o false)
+        // Funcion para devolver el estado del servicio (puede ser: true o false)
         function ServicioEstado(string memory _nombreServicio) public view returns (bool){
             return MappingServicios[_nombreServicio].EstadoServicio;
         }
         
         
-        // Función para devolver todos los servicios activos de la aseguradora
+        // Funcion para devolver todos los servicios activos de la aseguradora
         function ConsultarServiciosActivos() public view returns (string [] memory) {
         // Array para almacenar los servicios activos de la aseguradora
         string [] memory ServiciosActivos =  new string[](nombreServicios.length);
@@ -257,7 +257,7 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         propietario.aseguradora = _aseguradora;
     }
     
-    // Events requerits per informar de l'execució de certes funcions 
+    // Eventos requeridos para informar de la ejecución de ciertas funciones
     event servicioPagado (address, string, uint256);
     event EventoDevolverTokens(address, uint256);
     event EventoPeticionServicioLab(address, address,string);
@@ -283,10 +283,10 @@ contract InsuranceHealthRecord is OperacionesBasicas{
     // Mapping para guardar el historial del asegurado
     mapping (string => ServiciosSolicitados) historialAsegurado;
     
-    //Mapping guardar l'historial de l'assegurat amb els laboratori
+    // Mapping para guardar el historial del asegurado con los laboratorio
     ServicioSolicitadoLab [] historialAseguradoLaboratorio;
     
-    // Estructura del propietari
+    // Estructura del propietario
     struct Owner{
         address direccionPropietario;
         uint saldoPropietario;
@@ -296,7 +296,7 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         address payable aseguradora;
     }
     
-    // Modifier para controlar que únicamente el propietario de la póliza
+    // Modifier para controlar que unicamente el propietario de la póliza puede ejecutar ciertas funciones
     modifier Unicamente(address _direccion){
         require (_direccion == propietario.direccionPropietario, "No eres un asegurado.");
         _;
@@ -307,7 +307,7 @@ contract InsuranceHealthRecord is OperacionesBasicas{
     // Estructura para almacenar información de los servicios solicitados
     ServiciosSolicitados servicios;
        
-    // El asegurado compra tokens
+    // Funcion para que un asegurado compre tokens
     function CompraTokens (uint _numTokens) payable public Unicamente(msg.sender){
         // Se requiere que el numero de tokens comprados sea positivo
         require (_numTokens > 0, "Necesitas comprar un numero de tokens positivo.");
@@ -325,12 +325,12 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         return (propietario.tokens.balanceOf(address(this)));
     }
 
-    // Devuelve tokens i recupera ethers
+    // Funcion para que un aseguradora devuelva tokens i recupere su valor en ethers
     function devolverTokens(uint _numTokens) public payable Unicamente(msg.sender){
-        // El nombre de tokens a retornar ha de ser positiu
-        require (_numTokens > 0, "Necesitas devolver un número positivo de tokens.");
+        // El numero de tokens a devolver debe ser positivo 
+        require (_numTokens > 0, "Necesitas devolver un numero positivo de tokens.");
         // El usuario debe tener el número de tokens que desea devolver
-        require(_numTokens <= balanceOf(), "No tienes los tokens que desea devolver");
+        require(_numTokens <= balanceOf(), "No tienes los tokens que desea devolver.");
         // El propietario devuelve los tokens
         propietario.tokens.transfer(propietario.aseguradora, _numTokens);
         // Devolucion al asegurado
@@ -339,19 +339,19 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         emit EventoDevolverTokens(msg.sender, _numTokens);
     }
     
-    // Funció per fer la petició d'un servei a l'aseguradora  
+    // Función para hacer la petición de un servicio a la aseguradora 
      function peticionServicio(string memory _servicio) public Unicamente(msg.sender){
-        //Es comprova que el servei estigui donat d'alta
+        // Se comprueba que el servicio esté dado de alta
         require(InsuranceFactory(propietario.insurance).ServicioEstado(_servicio) == true, "El servicio no se ha dado de alta.");
-        // S'obté el preu del servei a partir de l'altre contracte IF
+        // Se obtiene el precio del servicio a partir del otro contrato IF
         uint256 pagamientoTokens = InsuranceFactory(propietario.insurance).getPrecioServicio(_servicio);
-        // Es necessari que el preu del servei sigui menor al nombre de tokens del que es disposa
+        // Es necesario que el precio del servicio sea menor al número de tokens de lo dispuesto
         require(pagamientoTokens <= balanceOf(), "Necesitas comprar más tokens para obtener este servicio");
-        // S'envien els tokens que val el servei a l'asseguradora (persona)
+        // Se envían los tokens que vale el servicio a la aseguradora (persona)
         propietario.tokens.transfer(propietario.aseguradora, pagamientoTokens);
-        // Relacio amb el nom del nou servei i l'estructura definida dels serveis solicitats
+        // Relacion con el nombre del nuevo servicio y la estructura definida de los servicios solicitados
         historialAsegurado[_servicio] = ServiciosSolicitados(_servicio,pagamientoTokens,true);
-        // Event per emtre que el servei s'ha pagat 
+        // Evento para avisar de que el servicio se ha pagado
         emit servicioPagado (msg.sender, _servicio, pagamientoTokens);
     }
     
@@ -374,22 +374,22 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         emit EventoPeticionServicioLab(_direccionLab,msg.sender,_servicio);
     }
     
-    // Función para ver el historial de los servicios de la aseguradora que ha consumido el asegurado
+    // Funcion para ver el historial de los servicios de la aseguradora que ha consumido el asegurado
     function HistorialAseguradora() public view Unicamente(msg.sender) returns(string memory) {
         return InsuranceFactory(propietario.insurance).consultarHistorialAsegurado(msg.sender, msg.sender);
     }
     
-    // Función para ver el historial del asegurado dado el nombre de un servicio por parametro (Función de ayuda para IF)
+    // Funcion para ver el historial del asegurado dado el nombre de un servicio por parametro (Función de ayuda para IF)
     function HistorialAsegurado(string memory _servicio) public view returns (string memory nombreServicio,uint precioServicio){
         return (historialAsegurado[_servicio].nombreServicio, historialAsegurado[_servicio].precioServicio);
     }
     
-    // Función para ver el historial del asegurado dado el nombre de un servicio para parametro
+    // Funcion para ver el historial del asegurado dado el nombre de un servicio para parametro
     function HistorialAseguradoLaboratorio() public view returns (ServicioSolicitadoLab[] memory){
         return historialAseguradoLaboratorio;
     }
     
-    // Función para devolver el estado del servicio (puede ser: true o false)
+    // Funcion para devolver el estado del servicio (puede ser: true o false)
         function ServicioEstadoAsegurado(string memory _nombreServicio) public view returns (bool){
             return historialAsegurado[_nombreServicio].estadoServicio;
         }
@@ -404,104 +404,103 @@ contract InsuranceHealthRecord is OperacionesBasicas{
     
 }
         
-// Contracte del laboratori que proveeix els serveis de PCR i RX
+// Contrato del laboratorio que da los servicios de PCR y RX
 contract Laboratorio is OperacionesBasicas {
     
-    //Adreça de la direccio que executa el contracte Laboratori    
-    address public DireccioLab;
-    address contracteAsseguradora;
+    // Direcciones necesarias  
+    address public DireccionLab;
+    address contratoAseguradora;
     
-    // Constructor del laboratori
-    constructor (address _account, address direccioContracteAsseguradora) public {
-        DireccioLab = _account;
-        contracteAsseguradora = direccioContracteAsseguradora;
+    // Constructor del laboratorio
+    constructor (address _account, address _direccionContratoAseguradora) public {
+        DireccionLab = _account;
+        contratoAseguradora = _direccionContratoAseguradora;
     }
     
-    // Estrucura del servei oferit pel laboratori 
-    struct ServeiLab{
-        string nomServei;
-        uint preu;
-        bool enFuncionament;
+    // Estrucura del servicio ofrecido por el laboratorio
+    struct ServicioLab{
+        string nombreServicio;
+        uint precio;
+        bool enFuncionamiento;
     }
 
-    // Array dels serveis que el laboratori ha posat en marxa (la variable enFuncionament == true)
-    string [] nomServeisLab;
-    // Mapping que relaciona el nom del servei amb l'estructura del servei
-    mapping (string => ServeiLab) public serveisLab;
+    // Array de los servicios que estan en funcionamiento 
+    string [] nombreServiciosLab;
+    // Mapping que relaciona el nombre del servicio con la estructura de datos del servicio 
+    mapping (string => ServicioLab) public serviciosLab;
     
-    // Events 
-    event serveiFuncionant (string,uint);
-    event EventDonarServei(address,string);
+    // Eventos 
+    event servicioFuncionando (string,uint);
+    event EventoDarServicio(address,string);
     
-    // Modificador per que tan sols els laboratoris puguin executar certes funcions
-    modifier UnicamentLab(address _account){
-        require (_account == DireccioLab, "No es té  permís per aquesta funció.");
+    // Restriccion para que unicamente el laboratorio pueda ejecutar ciertas funciones
+    modifier UnicamenteLab(address _direccion){
+        require (_direccion == DireccionLab, "No existen permisos para ejecutar esta funcion.");
         _;
     } 
     
-    // S'implementa un nou servei que a partir de l'array de serveis fixes es reconeix s'hi esta implementat i es dona preu al servei
-   function nouServeiOferit(string memory _servei, uint _preu) public UnicamentLab(msg.sender){
-    // Per comparar dos strings s'ha emprat un tractament especial
-    require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servei)) || keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servei)), "El servei no s'ha implementat");
-    // Es guarda la relacio amb el nom del servei i la seva estructura
-    serveisLab[_servei] = ServeiLab(_servei, _preu, true);
-    // Es guarda a l'array de serveis en funcionament 
-    nomServeisLab.push(_servei);
-    // Event del servei 
-    emit serveiFuncionant(_servei,_preu);
+    // Se implementa un nuevo servicio que a partir del array de servicios fijos se reconoce se esta implementado y se da precio al servicio
+   function nouServeiOferit(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
+    // Para comparar dos strings ha empleado un tratamiento especial como el siguiente:
+    require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servicio)) || keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servicio)), "El servicio no se ha implementado.");
+    // Se guarda la relación con el nombre del servicio y su estructura
+    serviciosLab[_servicio] = ServicioLab(_servicio, _precio, true);
+    // Se guarda en el array de servicios en funcionamiento
+    nombreServiciosLab.push(_servicio);
+    // Evento del servicio
+    emit servicioFuncionando(_servicio,_precio);
     }
     
-    // Es retorna el conjunt de serveis que es troben en funcionament al laboratori
+    // Se devuelve el conjunto de servicios que se encuentran en funcionamiento en el laboratorio
     function consultarServicios() public view returns (string [] memory){
-        return nomServeisLab;
+        return nombreServiciosLab;
     }
     
-    // Es retorna el preu del servei donat el seu nom
-    function consultarPrecioServicios(string memory _nomServei) public view returns (uint){
-        require(serveisLab["PCR"].enFuncionament == true, "El servei no està en funcionament.");
-        return serveisLab[_nomServei].preu;
+    // Se devuelve el precio del servicio dado su nombre
+    function consultarPrecioServicios(string memory _nombreServicio) public view returns (uint){
+        return serviciosLab[_nombreServicio].precio;
     }
 
-    // Mapping que relaciona una adreça amb els resultats de la seva PCR o RX. 
-    //I a més, permetrà veure els resultats de les proves que s'ha fet un usuari donada la seva adreça
-    mapping (address => string []) public resultatsServeis;
+    /* Mapping que relaciona una dirección con los resultados de su PCR o RX.
+     Y además, permitirá ver los resultados de las pruebas que se ha hecho un usuario dada su dirección */
+    mapping (address => string []) public resultadosServicios;
     
-    //Funció  per donar servei: donat una compte d'un assegurat i un nom d'un servei s'executarà el servei
-    function darServicio(address _compteAssegurat, string memory _nomServei) public {
-        // Es requereix que la persona que executa la funcio sigui un assegurat de l'asseguradora
-        InsuranceFactory IF = InsuranceFactory(contracteAsseguradora);
-        IF.FuncionUnicamenteAsegurado(_compteAssegurat);
-        //S'igualen dos strings mitjançant 'abi.encodePacked'
-        if(keccak256(abi.encodePacked(_nomServei)) == keccak256(abi.encodePacked("PCR"))){
-            PCR(_compteAssegurat);
-        }else if(keccak256(abi.encodePacked(_nomServei)) == keccak256(abi.encodePacked("RX"))){
-            RX(_compteAssegurat);
+    // Función para dar servicio: dado una cuenta de un asegurado y un nombre de un servicio se ejecutará el servicio
+    function darServicio(address _direccionAsegurado, string memory _nombreServicio) public {
+        // Se requiere que la persona que ejecuta la función sea un asegurado de la aseguradora
+        InsuranceFactory IF = InsuranceFactory(contratoAseguradora);
+        IF.FuncionUnicamenteAsegurado(_direccionAsegurado);
+        // Se igualan dos strings mediante 'abi.encodePacked'
+        if(keccak256(abi.encodePacked(_nombreServicio)) == keccak256(abi.encodePacked("PCR"))){
+            PCR(_direccionAsegurado);
+        }else if(keccak256(abi.encodePacked(_nombreServicio)) == keccak256(abi.encodePacked("RX"))){
+            RX(_direccionAsegurado);
         }
-        // Event del servei donat per l'assegurat respectiu
-        emit EventDonarServei(_compteAssegurat,_nomServei);
+        // Evento del servicio dado por el asegurado respectivo
+        emit EventoDarServicio(_direccionAsegurado,_nombreServicio);
     }
     
-    // Funció  per executar el servei de PCR
-    function PCR(address _compteAssegurat) private returns (string memory) {
-        // Es requreix que el servei s'hagi donat d'alta pel laboratori 
-        require(serveisLab["PCR"].enFuncionament == true, "El servei no està en funcionament.");
-        // Codi de la prova de la IPFS
-        string memory resultatPcr = "QmWzuN3uqxU5CRy3ts9QMubHShFqkw6Ba7F9Sw5Pp8NwVP";
-        // Relacio del resultat de la PCR amb l'adreça que s'ha fet la PCR
-        resultatsServeis[_compteAssegurat].push(resultatPcr);
-        // Retorna el codi respectiu al resultat per aquella adreça
-        return resultatPcr;
+    // Funcion para ejecutar el servicio de PCR
+    function PCR(address _direccionAsegurado) private returns (string memory) {
+        // Se requiere que el servicio se haya dado de alta por el laboratorio 
+        require(serviciosLab["PCR"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
+        // Codigo IPFS
+        string memory resultadoPcr = "QmWzuN3uqxU5CRy3ts9QMubHShFqkw6Ba7F9Sw5Pp8NwVP";
+        // Relacion del resultado de la PCR con la dirección que se ha hecho la PCR
+        resultadosServicios[_direccionAsegurado].push(resultadoPcr);
+        // Devuelve el código respecto al resultado por aquella dirección
+        return resultadoPcr;
     }
     
-    // Funció per executar una radiografia (RX)
-      function RX(address _compteAssegurat) private returns (string memory) {
-        // Es requreix que el servei s'hagi donat d'alta pel laboratori 
-        require(serveisLab["RX"].enFuncionament == true, "El servei no està en funcionament.");
-        // Codi de la prova de la IPFS
-        string memory resultatrx = "QmRUPWYZDzaU9RPQrEtLXVwDCFup9LK41TaiunsitAfoXX";
-        // Relacio del resultat de la PCR amb l'adreça que s'ha fet la PCR
-        resultatsServeis[_compteAssegurat].push(resultatrx);
-        // Retorna el codi respectiu al resultat per aquella adreça
-        return resultatrx;
+    // Funcion para ejecutar el servicio de radiografica (RX)
+      function RX(address _direccionAsegurado) private returns (string memory) {
+        // Se requiere que el servicio se haya dado de alta por el laboratorio 
+        require(serviciosLab["RX"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
+        // Codigo IPFS
+        string memory resultadorx = "QmRUPWYZDzaU9RPQrEtLXVwDCFup9LK41TaiunsitAfoXX";
+        // Relacion del resultado de la RX con la dirección que se ha hecho la RX
+        resultadosServicios[_direccionAsegurado].push(resultadorx);
+        // Devuelve el código respecto al resultado por aquella dirección
+        return resultadorx;
     }
 }
