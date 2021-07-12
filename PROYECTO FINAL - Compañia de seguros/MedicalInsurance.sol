@@ -440,7 +440,7 @@ contract Laboratorio is OperacionesBasicas {
     } 
     
     // Se implementa un nuevo servicio que a partir del array de servicios fijos se reconoce se esta implementado y se da precio al servicio
-   function nouServeiOferit(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
+   function nuevoServicioOfrecido(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
     // Para comparar dos strings ha empleado un tratamiento especial como el siguiente:
     require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servicio)) || keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servicio)), "El servicio no se ha implementado.");
     // Se guarda la relación con el nombre del servicio y su estructura
