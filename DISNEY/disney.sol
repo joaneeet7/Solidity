@@ -94,7 +94,6 @@ contract Disney{
         MappingAtracciones[_nombre] = atraccion(_nombre,_precio,true);
     }
     
-    //TODO: TRANSFERENCIA DE TOKENS
     // Atraccion de Nemo
     function Nemo() public returns(string memory) {
         // Precio de la atraccion (en tokens)
@@ -108,11 +107,29 @@ contract Disney{
         require(tokens_atraccion <= mis_tokens(), 
                 "Necesitas mas Tokens para subirte a esta atraccion.");
         
-        // El cliente paga la atraccion con Tokens
-        token.transfer(address(this),tokens_atraccion);
+        /* El cliente paga la atraccion con Tokens:
+         
+         - Ha sido necesario crear una funcion en ERC20.sol con el nombre de: 'transferencia_disney',
+         debido a que en caso de usar el Transfer o el TransferFrom las direcciones que se escogian
+         para realizar la transaccion eran equivocadas. Ya que el msg.sender que recibia el metodo Transfer
+         de ERC20.sol era la direccion del contrato y no del clientr*/
+        
+        token.transferencia_disney(msg.sender,address(this),tokens_atraccion);
         
         // Emision de un evento 
         emit disfruta_atraccion("Disfruta de Nemo");
+    }
+    
+    // Funcion para que un cliente de Disney pueda devolver tokens si lo desea
+    function devolverTokens(uint _numTokens) public payable {
+        // El numero de tokens a devolver debe ser positivo 
+        require (_numTokens > 0, "Necesitas devolver un numero positivo de tokens.");
+        // El usuario debe tener el número de tokens que desea devolver
+        require(_numTokens <= balanceOf(), "No tienes los tokens que desea devolver.");
+        // El cliente devuelve los tokens
+        token.transferencia_disney(msg.sender,address(this), _numTokens);
+        // Devolucion de los ethers al cliente
+        msg.sender.transfer(PrecioTokens(_numTokens)); 
     }
     
     

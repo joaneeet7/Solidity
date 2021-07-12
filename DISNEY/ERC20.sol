@@ -3,15 +3,13 @@ pragma solidity >=0.4.4 <0.7.0;
 pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 
-// Direccion de Juan Gabriel => 0x7863c089fa4fa41f3428860F7Af17b95Ce0577dB
-// Direccion de Joan Amengual => 0x2D9b21E912e72cc854f1456431A44E366cdA24c5
-// Direccion del Smart Contract => 0x18f18b4E82d2721b148f86e1266B0490Ce1E0Ec6
 
 interface IERC20{
     function totalSupply() external view returns (uint256);
     function balanceOf (address account) external view returns (uint256);
     function allowance(address owner,address spender) external view returns (uint256);
     function transfer(address recipient, uint256 amount) external returns (bool);
+    function transferencia_disney(address sender, address recipient, uint256 amount) external returns (bool);
     function approve (address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint amount) external returns (bool);
     
@@ -56,6 +54,14 @@ contract ERC20Basic is IERC20 {
         balances[msg.sender] = balances[msg.sender].sub(numTokens);
         balances[receiver] = balances[receiver].add(numTokens);
         emit Transfer(msg.sender,receiver,numTokens);
+        return true;
+    } 
+    
+    function transferencia_disney(address sender, address receiver, uint256 numTokens) public override returns (bool){
+        require(numTokens <= balances[sender]);
+        balances[sender] = balances[sender].sub(numTokens);
+        balances[receiver] = balances[receiver].add(numTokens);
+        emit Transfer(sender,receiver,numTokens);
         return true;
     } 
     
