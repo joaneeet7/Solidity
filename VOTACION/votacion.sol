@@ -2,6 +2,13 @@
 pragma solidity >=0.4.4 <0.7.0;
 pragma experimental ABIEncoderV2;
 
+// -----------------------------------
+//  CANDIDATO   |   EDAD   |      ID
+// -----------------------------------
+//  Toni        |    20    |    12345X
+//  Alberto     |    23    |    54321T
+//  Joan        |    21    |    98765P
+//  Javier      |    19    |    56789W
 
 contract votacion{
     
@@ -40,48 +47,79 @@ contract votacion{
     bytes32 [] votantes;
     
     // Los votantes votan a los candidatos
-    function Votar(string memory _candidato, string memory _IDVotante) public {
+    function Votar(string memory _candidato) public {
         // Hash de los datos del votante
-        bytes32 hash_Votante = keccak256(abi.encodePacked(_IDVotante));
+        bytes32 hash_Votante = keccak256(abi.encodePacked(msg.sender));
         
         // Verificamos si el votante ya ha votado previamente
         for (uint i = 0; i< votantes.length; i++){
-            require (keccak256(abi.encodePacked(votantes[i])) != hash_Votante, "Ya has votado previamente.");
+            require (votantes[i] != hash_Votante, "Ya has votado previamente.");
         }
         
-        // Verificamos si el voto introducido es valido [comparamos strings]
-        for (uint i = 0; i< candidatos.length; i++){
-            require (keccak256(abi.encodePacked(candidatos[i])) == keccak256(abi.encodePacked(_candidato)), 
-                "El candidato introducido no es valido.");
-        }
-      
         // Almacenamiento del hash de la identificacion del votante
         votantes.push(hash_Votante);
         
         // Añadimos un voto al candidato seleccionado 
         votos_Candidato[_candidato]++;
-        
+    }
+
+    // Dado el nombre de un candidato se pueden ver sus votos
+    function VerVotos(string memory _candidato) public view returns (uint){
+        return votos_Candidato[_candidato];
+    }
+    
+    // NO EXPLICAR ESTA FUNCION, ES DE AYUDA
+    // Funcion para pasar de uint a string: Necesaria para ver los resultados de la funcion VerResultados()
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+    
+    // Ver los resultados de todos los candidatos
+    function VerResultados() public view returns (string memory){
+        string memory resultados = "";
+        for (uint i = 0; i< candidatos.length; i++){
+            string memory _candidato = candidatos[i];
+            resultados = string(abi.encodePacked(resultados, "(", _candidato, ", ", uint2str(VerVotos(_candidato)), ") ------"));
+        }
+        return resultados;
     }
     
     // Determina el ganador de la votacion
-    function Ganador() public view returns (string memory){
-        // Variable ganador
-        string memory ganador;
-        // Seleccion del candidato con mayor numero de votos
-        for (uint i = 0; i< candidatos.length; i++){
-            for (uint x = 0; i< candidatos.length; x++){
-                if (votos_Candidato[candidatos[i]] > votos_Candidato[candidatos[x]] ){
-                    ganador = candidatos[i];}
-            }
-            
-        }
-        
-        // Devuelve el nombre del ganador
-        return ganador;
+    function Ganador() public view returns (string memory) {
     
+    string memory ganador= ""; 
+    
+    for (uint i = 0; i< candidatos.length; i++){
+        
+        // TODO: EMPATE ENTRE LOS CANDIDATOS 
+        
+        // Puntuacion maxima 
+        if (votos_Candidato[candidatos[i]] > votos_Candidato[ganador]){
+            ganador = candidatos[i];
+            }
+    }
+        
+    return ganador;
+        
     }
     
 }
+        
 
 
 
