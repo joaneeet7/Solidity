@@ -3,123 +3,71 @@ pragma solidity >=0.4.4 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 // -----------------------------------
-//  CANDIDATO   |   EDAD   |      ID
+//  ALUMNO   |    ID    |      NOTA
 // -----------------------------------
-//  Toni        |    20    |    12345X
-//  Alberto     |    23    |    54321T
-//  Joan        |    21    |    98765P
-//  Javier      |    19    |    56789W
+//  Joan   |    77755N    |      5
+//  Alba   |    12345X    |      9
+//  Maria  |    02468T    |      2
+//  Rafael |    13579U    |      3
+//  Pilar  |    98765Z    |      5
 
-contract votacion{
+contract notas {
     
-    // Direccion del propietario
-    address owner;
+    // Direcion del profesor 
+    address profesor;
     
     // Constructor
-    constructor () public {
-        owner = msg.sender;
+    constructor () public{
+        profesor = msg.sender;
     }
     
-    // Relacion entre el nombre del candidato y el hash de sus datos personales
-    mapping (string => bytes32) ID_Candidato;
-    // Lista para alamecenar los nombres de los candidatos
-    string [] candidatos; 
+    // Mapping para relacionar el hash de la id del alumno con su nota
+    mapping (bytes32 => uint) Notas;
+    event alumno_evaluado(bytes32 _idAlumno);
     
-    // Los representantes se presentan como candidatos
-    function Representar(string memory _nombrePersona, uint _edadPersona, string memory _idPersona) public {
-        // Hash de los datos del candidato
-        bytes32 hash_Candidato = keccak256(abi.encodePacked(_nombrePersona, _edadPersona, _idPersona));
-        // Almacenamiento del hash de los datos del candidato ligados a su nombre 
-        ID_Candidato[_nombrePersona] = hash_Candidato;
-        // Almacenamiento del nombre del candidato
-        candidatos.push(_nombrePersona);
+    // Evaluar a los alumnos
+    function evaluar(string memory _idAlumno, uint _nota) public UnicamenteProfesor(msg.sender) {
+        // Hash de la identificacion del alumno
+        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_idAlumno));
+        // Relacion del hash del alumno y su nota
+        Notas[hash_idAlumno] = _nota;
+        // Emision del evento
+        emit alumno_evaluado(hash_idAlumno);
     }
     
-    // Ver que personas se han presentado 
-    function VerCandidatos() public view returns(string [] memory ) {
-        // Devuelve la lista de candidatos presentados
-        return candidatos;
+    // Ver las notas     
+    function VerNotas(string memory _idAlumno) public view returns (uint256){
+        // Hash de la identificacion del alumno
+        bytes32 hash_idAlumno = keccak256(abi.encodePacked(_idAlumno));
+        // Nota del alumno
+        return Notas[hash_idAlumno];
     }
     
-    // Relacion entre el nombre del candidato votado y el numero de votos
-    mapping (string => uint) votos_Candidato;
-    // Hash de la identidad del votante
-    bytes32 [] votantes;
+    // Array de los alumnos que piden revision 
+    string [] revisiones;
     
-    // Los votantes votan a los candidatos
-    function Votar(string memory _candidato) public {
-        // Hash de los datos del votante
-        bytes32 hash_Votante = keccak256(abi.encodePacked(msg.sender));
-        
-        // Verificamos si el votante ya ha votado previamente
-        for (uint i = 0; i< votantes.length; i++){
-            require (votantes[i] != hash_Votante, "Ya has votado previamente.");
-        }
-        
-        // Almacenamiento del hash de la identificacion del votante
-        votantes.push(hash_Votante);
-        
-        // Añadimos un voto al candidato seleccionado 
-        votos_Candidato[_candidato]++;
-    }
-
-    // Dado el nombre de un candidato se pueden ver sus votos
-    function VerVotos(string memory _candidato) public view returns (uint){
-        return votos_Candidato[_candidato];
+    // Evento de la solicitud de la revision
+    event evento_revision(string);
+    
+    // Pedir revision del examen
+    function Revision(string memory _idAlumno) public {
+        // Almacenamiento de la id del alumno en un array
+        revisiones.push(_idAlumno);
+        // Emision del evento
+        emit evento_revision(_idAlumno);
     }
     
-    // NO EXPLICAR ESTA FUNCION, ES DE AYUDA
-    // Funcion para pasar de uint a string: Necesaria para ver los resultados de la funcion VerResultados()
-    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
-            _i /= 10;
-        }
-        return string(bstr);
+    // Ver alumnos que han solicitado revisiones del examen 
+    function VerRevisiones() public view UnicamenteProfesor(msg.sender) returns (string [] memory){
+        return revisiones;
     }
     
-    // Ver los resultados de todos los candidatos
-    function VerResultados() public view returns (string memory){
-        string memory resultados = "";
-        for (uint i = 0; i< candidatos.length; i++){
-            string memory _candidato = candidatos[i];
-            resultados = string(abi.encodePacked(resultados, "(", _candidato, ", ", uint2str(VerVotos(_candidato)), ") ------"));
-        }
-        return resultados;
+    // Modifier para controlar las funciones que unicamente ejecuta el profesor
+    modifier UnicamenteProfesor(address _direccion){
+        // Requiere que la direccion introducida sea identica a la del profesor
+        require (_direccion == profesor, "No tienes permisos para estas funciones.");
+        _;
     }
     
-    // Determina el ganador de la votacion
-    function Ganador() public view returns (string memory) {
-    
-    string memory ganador= ""; 
-    
-    for (uint i = 0; i< candidatos.length; i++){
-        
-        // TODO: EMPATE ENTRE LOS CANDIDATOS 
-        
-        // Puntuacion maxima 
-        if (votos_Candidato[candidatos[i]] > votos_Candidato[ganador]){
-            ganador = candidatos[i];
-            }
-    }
-        
-    return ganador;
-        
-    }
     
 }
-        
-
-
-
