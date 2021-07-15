@@ -3,28 +3,13 @@ pragma solidity >=0.4.4 <0.7.0;
 pragma experimental ABIEncoderV2;
 import "./ERC20.sol";
 
-
 contract loteria{
-    
-    // Implementar la compra de Tokens
-    // Funcion para comprar tickets de numeros aleatorios entre un rango de numeros y almacenarlos en un array
-    // Funcion para comprar tickets con tokens
-    // Funcion para ejecutar el ganador (aleatoriamente de un billete comprado):
-        // Asignar all bote de Tokens al ganador
-    // Funcion para cambiar los Tokens por ethers
-    
-    
-    // Analisis del proyecto:
-        // Ver que ofrece este programa en terminos de seguridad
-        // Desplegarlo sobre Rinkeby con Metamask
-        // Realizar all the proceso de LOTERIA 
-        
     
     // Instancia del contrato token
     ERC20Basic private token;
     
     // Direcciones
-    address payable public owner;
+    address public owner;
     address public contrato;
     uint public tokens_creados = 10000;
     
@@ -87,7 +72,6 @@ contract loteria{
     
     // Precio del boleto
     uint public PrecioBoleto = 5;
-    
     // Relacion entre la de la persona y sus boletos
     mapping (address => uint []) idPersona_boletos;
     // Relacion necesaria para identificar el ganador
@@ -99,8 +83,6 @@ contract loteria{
     // Evento para emitir que numero de boleto se ha comprado
     event boleto_comprado(uint);
     
-    
-    
     function CompraBoleto(uint _boletos) public {
         // Precio total de los boletos a comprar
         uint precio_total = _boletos * PrecioBoleto;
@@ -110,13 +92,11 @@ contract loteria{
                 "Necesitas mas Tokens para comprar un boleto.");
         
         /* El cliente paga el boleto con Tokens:
-         
          - Ha sido necesario crear una funcion en ERC20.sol con el nombre de: 'transferencia_loteria',
          debido a que en caso de usar el Transfer o el TransferFrom las direcciones que se escogian
          para realizar la transaccion eran equivocadas. Ya que el msg.sender que recibia el metodo Transfer
          de ERC20.sol era la direccion del contrato y no del cliente.*/
         token.transferencia_loteria(msg.sender,owner,precio_total);
-        
         
         /*Lo que esto haría es tomar la marca de tiempo de now, el msg.sender, y un nonce 
         (un número que sólo se utiliza una vez, para que no ejecutemos dos veces la misma 
@@ -127,6 +107,7 @@ contract loteria{
         for (uint i = 0; i< _boletos; i++){
             uint random = uint(keccak256(abi.encodePacked(now, msg.sender, randNonce))) % 10000;
             randNonce++;
+            // Almacenamos los datos de los boletos generados
             idPersona_boletos[msg.sender].push(random);
             boletos_comprados.push(random);
             ADN_Boleto[random] = msg.sender;
@@ -159,13 +140,19 @@ contract loteria{
         token.transferencia_loteria(msg.sender,direccion_ganador,Bote());
     }
     
+
     // Funcion para que un cliente pueda devolver tokens si lo desea
-    function DevolverTokens() public payable {
+    function DevolverTokens(uint _numTokens) public payable {
+        // El numero de tokens a devolver debe ser positivo 
+        require (_numTokens > 0, "Necesitas devolver un numero positivo de tokens.");
+        // El usuario debe tener el número de tokens que desea devolver
+        require(_numTokens <= MisTokens(), "No tienes los tokens que desea devolver.");
          // El cliente devuelve los tokens
         token.transferencia_loteria(msg.sender,address(this), MisTokens());
-        // TODO: Devolucion de los ethers al cliente
-        msg.sender.transfer(PrecioTokens(MisTokens())); 
+        // Devolucion de los ethers al cliente
+        msg.sender.transfer(PrecioTokens(_numTokens)); 
     }
+    
     
     // Modifier para controlar las funciones que unicamente ejecuta la loteria
     modifier Unicamente(address _direccio){
