@@ -32,7 +32,7 @@ contract Disney{
     }
     
     // Comprar Tokens para poder disfrutar de Disney
-    function compraTokens(uint _numTokens) public payable {
+    function CompraTokens(uint _numTokens) public payable {
         // Transfarencia de los tokens
         uint coste = PrecioTokens(_numTokens);
         // Se requiere que el valor introducido sea mayor al coste
@@ -51,12 +51,12 @@ contract Disney{
     }
     
     // Generacion de tokens
-    function generaTokens(uint _numTokens) public Unicamente(msg.sender) {
+    function GeneraTokens(uint _numTokens) public Unicamente(msg.sender) {
         token.increaseTotalSuply(_numTokens); 
     }
     
     // Balance de tokens de un cliente
-     function mis_tokens() public view returns(uint256 tokens){
+     function MisTokens() public view returns(uint256 tokens){
         return token.balanceOf(msg.sender);
     }
     
@@ -65,22 +65,27 @@ contract Disney{
         return token.balanceOf(address(this));
     }
     
-    
     // Modifier para controlar las funciones que unicamente ejecuta Disney
     modifier Unicamente(address _direccio){
         require (_direccio == owner, "No tienes permisos para estas funciones.");
         _;
     }
     
-    
     // ------------------------------------------------------------------------------------------------ //
     
-    
-    // Evento para disfrutar de la atraccion
-    event disfruta_atraccion (string _atraccion);
-    
+    // Eventos
+    event disfruta_atraccion (string);
+    event nueva_atraccion(string);
+    event baja_atraccion(string);
+        
     //Mapping para relacionar un nombre de una atraccion y la struct de la atraccion
     mapping (string => atraccion) public MappingAtracciones;
+    
+    // Mapping para relacion una identidad con el historial de atracciones a las que ha subido
+    mapping (address => string []) HistorialAtracciones;
+    
+    // Array para almacenar las atracciones 
+    string [] Atracciones;
     
     //Estructura de la atraccion
     struct atraccion{
@@ -89,49 +94,66 @@ contract Disney{
         bool estado_atraccion;
         }
     
-    // Función para crear nuevas atracciones (solo ejecutable por Disney)
-    function nuevaAtraccion(string memory _nombre, uint256 _precio) public Unicamente (msg.sender){
-        MappingAtracciones[_nombre] = atraccion(_nombre,_precio,true);
+    // Crear nuevas atracciones para DISNEY (solo ejecutable por Disney)
+    function NuevaAtraccion(string memory _nombreAtraccion, uint256 _precio) public Unicamente (msg.sender){
+        // Creacion de un atraccion nueva en Disney
+        MappingAtracciones[_nombreAtraccion] = atraccion(_nombreAtraccion,_precio,true);
+        // Almacenamiento en una lista de su nombre
+        Atracciones.push(_nombreAtraccion);
+        // Emision del evento para un nueva atraccion
+        emit nueva_atraccion(_nombreAtraccion);
     }
     
-    // Atraccion de Nemo
-    function Nemo() public returns(string memory) {
+    // Dar de baja atracciones de DISNEY
+    function BajaAtraccion(string memory _nombreAtraccion) public Unicamente(msg.sender){
+        // El estado de la atraccion pasa a ser falso => NO ESTA DISPONIBLE 
+        MappingAtracciones[_nombreAtraccion].estado_atraccion = false;
+        // Emision del evento de dar de baja a una atraccion
+        emit baja_atraccion(_nombreAtraccion);
+    }
+    
+    // Visualiza las atracciones de Disney
+    function AtraccionesDisponibles() public view returns (string [] memory){
+        return Atracciones;
+    }
+    
+    // Funcion para subirse a una atraccion de DISNEY y pagar su valor con tokens
+    function SubirseAtraccion(string memory _nombreAtraccion) public {
         // Precio de la atraccion (en tokens)
-        uint tokens_atraccion = MappingAtracciones["Nemo"].precio_atraccion;
-        
+        uint tokens_atraccion = MappingAtracciones[_nombreAtraccion].precio_atraccion;
         // Se verifica que la atraccion esta disponible
-        require(MappingAtracciones["Nemo"].estado_atraccion == true, 
+        require(MappingAtracciones[_nombreAtraccion].estado_atraccion == true, 
                 "La atraccion no esta disponible en estos momentos.");
-        
         // Se verifica que el cliente tenga el numero de tokens necesario
-        require(tokens_atraccion <= mis_tokens(), 
+        require(tokens_atraccion <= MisTokens(), 
                 "Necesitas mas Tokens para subirte a esta atraccion.");
-        
         /* El cliente paga la atraccion con Tokens:
-         
          - Ha sido necesario crear una funcion en ERC20.sol con el nombre de: 'transferencia_disney',
          debido a que en caso de usar el Transfer o el TransferFrom las direcciones que se escogian
          para realizar la transaccion eran equivocadas. Ya que el msg.sender que recibia el metodo Transfer
-         de ERC20.sol era la direccion del contrato y no del clientr*/
-        
+         de ERC20.sol era la direccion del contrato y no del cliente*/
         token.transferencia_disney(msg.sender,address(this),tokens_atraccion);
-        
-        // Emision de un evento 
-        emit disfruta_atraccion("Disfruta de Nemo");
+        // Almacenamiento en el historial de atracciones disfrutadas
+        HistorialAtracciones[msg.sender].push(_nombreAtraccion);
+        // Emision del evento para disfrutar de la atraccion
+        emit disfruta_atraccion(_nombreAtraccion);
     }
     
-    // Funcion para que un cliente de Disney pueda devolver tokens si lo desea
-    function devolverTokens(uint _numTokens) public payable {
+    // Visualiza el historial completo de atracciones disfrutadas del cliente
+    function Historial() public view returns (string [] memory){
+        return HistorialAtracciones[msg.sender];
+    }
+    
+    // Funcion para que un cliente de Disney pueda devolver un numero de tokens si lo desea
+    function DevolverTokens(uint _numTokens) public payable {
         // El numero de tokens a devolver debe ser positivo 
         require (_numTokens > 0, "Necesitas devolver un numero positivo de tokens.");
         // El usuario debe tener el número de tokens que desea devolver
         require(_numTokens <= balanceOf(), "No tienes los tokens que desea devolver.");
-        // El cliente devuelve los tokens
+         // El cliente devuelve los tokens
         token.transferencia_disney(msg.sender,address(this), _numTokens);
         // Devolucion de los ethers al cliente
         msg.sender.transfer(PrecioTokens(_numTokens)); 
     }
-    
-    
     
 }
