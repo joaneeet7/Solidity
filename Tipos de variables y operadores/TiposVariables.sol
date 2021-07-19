@@ -27,6 +27,11 @@ contract TiposVariables{
     uint16 EnteroDe16Bits;
     uint32 EnteroDe32Bits;
     int128 EnteroDe128Bits;
+    enum Estado {Encendido, Apagado}
+
+    constructor () public {
+        
+    }
     
     //Notemos que uint256 es lo mismo que uint. Lo mismo pasa con int256 y int.
     uint32 cota_2 = uint32(cota);
@@ -42,6 +47,10 @@ contract TiposVariables{
     
     string greeting = "hola";
     bool flag = true;
+
+    /*
+
+    */
     
 }
 
