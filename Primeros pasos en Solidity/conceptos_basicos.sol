@@ -52,7 +52,7 @@ contract PrimerContrato{
         
     }
     
-    Debe incluir la informaci´ón necesaria para construir el contrato. Por ejemplo la direccion de la persona que despliegue el contrato 
+    Debe incluir la informacion necesaria para construir el contrato. Por ejemplo la direccion de la persona que despliegue el contrato 
     para identificar el propietario del contrato.
     si el contrato es muy simple no es necesario su uso.
     Debe incluir la informacion inmutable del contrato
