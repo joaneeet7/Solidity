@@ -442,7 +442,8 @@ contract Laboratorio is OperacionesBasicas {
     // Se implementa un nuevo servicio que a partir del array de servicios fijos se reconoce se esta implementado y se da precio al servicio
    function nuevoServicioOfrecido(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
     // Para comparar dos strings ha empleado un tratamiento especial como el siguiente:
-    require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servicio)) || keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servicio)), "El servicio no se ha implementado.");
+    require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servicio)) || 
+    keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servicio)), "El servicio no se ha implementado.");
     // Se guarda la relación con el nombre del servicio y su estructura
     serviciosLab[_servicio] = ServicioLab(_servicio, _precio, true);
     // Se guarda en el array de servicios en funcionamiento
@@ -480,12 +481,13 @@ contract Laboratorio is OperacionesBasicas {
         emit EventoDarServicio(_direccionAsegurado,_nombreServicio);
     }
     
+    
     // Funcion para ejecutar el servicio de PCR
     function PCR(address _direccionAsegurado) private returns (string memory) {
         // Se requiere que el servicio se haya dado de alta por el laboratorio 
         require(serviciosLab["PCR"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
-        // Codigo IPFS
-        string memory resultadoPcr = "QmWzuN3uqxU5CRy3ts9QMubHShFqkw6Ba7F9Sw5Pp8NwVP";
+        // Codigo IPFS 
+        string memory resultadoPcr = "QmNZTbxobVxzsCv4uwvSrh5a8bw6zJKFmNYvKbeRdDrnjT";
         // Relacion del resultado de la PCR con la dirección que se ha hecho la PCR
         resultadosServicios[_direccionAsegurado].push(resultadoPcr);
         // Devuelve el código respecto al resultado por aquella dirección
@@ -497,7 +499,7 @@ contract Laboratorio is OperacionesBasicas {
         // Se requiere que el servicio se haya dado de alta por el laboratorio 
         require(serviciosLab["RX"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
         // Codigo IPFS
-        string memory resultadorx = "QmRUPWYZDzaU9RPQrEtLXVwDCFup9LK41TaiunsitAfoXX";
+        string memory resultadorx = "QmPQv689v3no3Us8eARUtMuQySyLyoPv4w4ssD51jSMY1Z";
         // Relacion del resultado de la RX con la dirección que se ha hecho la RX
         resultadosServicios[_direccionAsegurado].push(resultadorx);
         // Devuelve el código respecto al resultado por aquella dirección
