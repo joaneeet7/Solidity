@@ -17,9 +17,13 @@ contract votacion{
     //Direccion del propietario del contrato
     address owner;
     
+    //Almacenamos el valor de tiempo en que empiezan las elecciones
+    uint empiezan_votaciones;
+    
     //constructor
     constructor () public{
         owner = msg.sender;
+        empiezan_votaciones = now;
     }
     
     //Relacion entre el nombre del candidato y el hash de sus datos personales
@@ -37,6 +41,9 @@ contract votacion{
     
     //Cualquier persona puede usar esta funcion para presentarse a las elecciones
     function Representar(string memory _nombrePersona, uint _edadPersona, string memory _idPersona) public{
+        
+        //Tenemos la mitad del tiempo total para que se presenten candidatos
+        require(now<=(empiezan_votaciones + 1 minutes)/2, "Ya no se pueden presentar candidatos");
         
         //Hash de los datos del candidato
         bytes32 hash_Candidato = keccak256(abi.encodePacked(_nombrePersona, _edadPersona, _idPersona));
@@ -58,6 +65,9 @@ contract votacion{
     //Los votantes van a poder votar
     function Votar(string memory _candidato) public{
         
+        //Solamente se puede votar dentro del periodo de votacion
+        require(now<=empiezan_votaciones + 1 minutes, "Ya no se puede votar");
+        
         //Hash de la direccion de la persona que ejecuta esta funcion
         bytes32 hash_Votante = keccak256(abi.encodePacked(msg.sender));
         //Verificamos si el votante ya ha votado
@@ -66,6 +76,22 @@ contract votacion{
         }
         //Almacenamos el hash del votante dentro del array de votantes
         votantes.push(hash_Votante);
+        
+        //Verificamos que el candidato esta en la lista de candidatos
+        
+        //La variable flag sera true si el candidato esta en la lista
+        bool flag = false;
+        
+        for(uint j=0; j<candidatos.length; j++){
+            //Comparamos el nombre del candidato con el nombre del candidato en la posicion i
+            if(keccak256(abi.encodePacked(candidatos[j])) == keccak256(abi.encodePacked(_candidato))){
+                //Si coinciden cambiamos el valor de flag
+                flag=true;
+            }
+        }
+        //Es necesario que el candidato este en la lista para poder votar
+        require(flag==true, "No hay ningun candidato con ese nombre");
+        
         //Añadimos un voto al candidato seleccionado
         votos_candidato[_candidato]++;
     }
@@ -115,6 +141,9 @@ contract votacion{
     
     //Proporcionar el nombre del candidato ganador
     function Ganador() public view returns(string memory){
+        
+        //No se puede ejecutar la funcion hasta que terminan las votaciones
+        require(now>(empiezan_votaciones + 1 minutes), "Todavia no han terminado las votaciones");
         
         //La variable ganador contendra el nombre del candidato ganador 
         string memory ganador= candidatos[0];
