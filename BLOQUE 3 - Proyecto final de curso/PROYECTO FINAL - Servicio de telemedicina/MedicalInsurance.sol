@@ -362,13 +362,13 @@ contract InsuranceHealthRecord is OperacionesBasicas{
         // Instancia del contrato del Laboratorio que tiene por dirección 'dirección Lab'
         Laboratorio contratoLab = Laboratorio(_direccionLab);
         // Es necesario hacer un require para diferenciar los ethers y los tokens del asegurado
-        require(msg.value == contratoLab.consultarPrecioServicios(_servicio) * 1 ether, "Operación no válida.");
+        require(msg.value == contratoLab.ConsultarPrecioServicios(_servicio) * 1 ether, "Operación no válida.");
         // Se da el servicio al asegurado
-        contratoLab.darServicio(msg.sender, _servicio);
+        contratoLab.DarServicio(msg.sender, _servicio);
         // Se paga el servicio al Laboratorio (cuenta, no contrato)
-        payable(contratoLab.DireccionLab()).transfer(contratoLab.consultarPrecioServicios(_servicio) * 1 ether);
+        payable(contratoLab.DireccionLab()).transfer(contratoLab.ConsultarPrecioServicios(_servicio) * 1 ether);
         // Se actualiza el historial de operaciones con Laboratorios del asegurado
-        ServicioSolicitadoLab memory nuevoServicio = ServicioSolicitadoLab(_servicio, contratoLab.consultarPrecioServicios(_servicio), _direccionLab);
+        ServicioSolicitadoLab memory nuevoServicio = ServicioSolicitadoLab(_servicio, contratoLab.ConsultarPrecioServicios(_servicio), _direccionLab);
         historialAseguradoLaboratorio.push(nuevoServicio);
         // Evento que informa de la peticion del servicio
         emit EventoPeticionServicioLab(_direccionLab,msg.sender,_servicio);
@@ -417,6 +417,21 @@ contract Laboratorio is OperacionesBasicas {
         contratoAseguradora = _direccionContratoAseguradora;
     }
     
+    // Relacion entre el asegurado y el servicio que ha solicitado
+    mapping (address => string) public ServicioSolicitado;
+    
+    // Direcciones de las personas que han solicitado un servicio
+    address [] public PeticionesServicios;
+    
+    // Relacion entre el asegurado y sus resultados del Servicio 
+    mapping (address => ResultadoServicio) ResultadosServiciosLab;
+    
+    // Estructura del resultado de un servicio
+    struct ResultadoServicio {
+        string diagnostico_servicio;
+        string codigo_IPFS;
+    }
+    
     // Estrucura del servicio ofrecido por el laboratorio
     struct ServicioLab{
         string nombreServicio;
@@ -426,12 +441,14 @@ contract Laboratorio is OperacionesBasicas {
 
     // Array de los servicios que estan en funcionamiento 
     string [] nombreServiciosLab;
+    
     // Mapping que relaciona el nombre del servicio con la estructura de datos del servicio 
     mapping (string => ServicioLab) public serviciosLab;
     
+    
     // Eventos 
-    event servicioFuncionando (string,uint);
-    event EventoDarServicio(address,string);
+    event Evento_ServicioFuncionando (string,uint);
+    event Evento_DarServicio (address,string);
     
     // Restriccion para que unicamente el laboratorio pueda ejecutar ciertas funciones
     modifier UnicamenteLab(address _direccion){
@@ -439,70 +456,54 @@ contract Laboratorio is OperacionesBasicas {
         _;
     } 
     
-    // Se implementa un nuevo servicio que a partir del array de servicios fijos se reconoce se esta implementado y se da precio al servicio
-   function nuevoServicioOfrecido(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
-    // Para comparar dos strings ha empleado un tratamiento especial como el siguiente:
-    require(keccak256(abi.encodePacked("PCR")) == keccak256(abi.encodePacked(_servicio)) || 
-    keccak256(abi.encodePacked("RX")) == keccak256(abi.encodePacked(_servicio)), "El servicio no se ha implementado.");
-    // Se guarda la relación con el nombre del servicio y su estructura
-    serviciosLab[_servicio] = ServicioLab(_servicio, _precio, true);
-    // Se guarda en el array de servicios en funcionamiento
-    nombreServiciosLab.push(_servicio);
-    // Evento del servicio
-    emit servicioFuncionando(_servicio,_precio);
-    }
-    
     // Se devuelve el conjunto de servicios que se encuentran en funcionamiento en el laboratorio
-    function consultarServicios() public view returns (string [] memory){
+    function ConsultarServicios() public view returns (string [] memory){
         return nombreServiciosLab;
     }
     
     // Se devuelve el precio del servicio dado su nombre
-    function consultarPrecioServicios(string memory _nombreServicio) public view returns (uint){
+    function ConsultarPrecioServicios(string memory _nombreServicio) public view returns (uint){
         return serviciosLab[_nombreServicio].precio;
     }
 
-    /* Mapping que relaciona una dirección con los resultados de su PCR o RX.
-     Y además, permitirá ver los resultados de las pruebas que se ha hecho un usuario dada su dirección */
-    mapping (address => string []) public resultadosServicios;
+    // Funcion para dar un nuevo servicio de alta
+    function NuevoServicioLab(string memory _servicio, uint _precio) public UnicamenteLab(msg.sender){
+        // Creacion de un nuevo servicio 
+        serviciosLab[_servicio] = ServicioLab(_servicio, _precio, true);
+        // Se guarda en el array de servicios en funcionamiento
+        nombreServiciosLab.push(_servicio);
+        // Evento del servicio
+        emit Evento_ServicioFuncionando(_servicio,_precio);
+    }
     
-    // Función para dar servicio: dado una cuenta de un asegurado y un nombre de un servicio se ejecutará el servicio
-    function darServicio(address _direccionAsegurado, string memory _nombreServicio) public {
+    // Funcion para dar un servicio a un asegurado 
+    function DarServicio(address _direccionAsegurado, string memory _servicio) public {
         // Se requiere que la persona que ejecuta la función sea un asegurado de la aseguradora
         InsuranceFactory IF = InsuranceFactory(contratoAseguradora);
         IF.FuncionUnicamenteAsegurado(_direccionAsegurado);
-        // Se igualan dos strings mediante 'abi.encodePacked'
-        if(keccak256(abi.encodePacked(_nombreServicio)) == keccak256(abi.encodePacked("PCR"))){
-            PCR(_direccionAsegurado);
-        }else if(keccak256(abi.encodePacked(_nombreServicio)) == keccak256(abi.encodePacked("RX"))){
-            RX(_direccionAsegurado);
-        }
-        // Evento del servicio dado por el asegurado respectivo
-        emit EventoDarServicio(_direccionAsegurado,_nombreServicio);
+        // Se require que el servicio este activo
+        require(serviciosLab[_servicio].enFuncionamiento == true, "El servicio no esta activo");
+        // Relacion entre la persona y el servicio solicitado 
+        ServicioSolicitado[_direccionAsegurado] = _servicio;
+        // Almacenamos las personas que piden un servicio
+        PeticionesServicios.push(_direccionAsegurado);
+        // Emision del servicio 
+        emit Evento_DarServicio (_direccionAsegurado, _servicio);
+    }
+  
+    // Funcion para que el laboratorio pueda asignar los resultados al asegurado
+    function DarResultados(address _direccionAsegurado, string memory _diagnostico, string memory _codigoIPFS) public UnicamenteLab(msg.sender){
+        // Uso del mapping que relaciona un asegurado con la estructura de resultados
+        ResultadosServiciosLab[_direccionAsegurado] = ResultadoServicio (_diagnostico, _codigoIPFS);
     }
     
-    
-    // Funcion para ejecutar el servicio de PCR
-    function PCR(address _direccionAsegurado) private returns (string memory) {
-        // Se requiere que el servicio se haya dado de alta por el laboratorio 
-        require(serviciosLab["PCR"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
-        // Codigo IPFS 
-        string memory resultadoPcr = "QmNZTbxobVxzsCv4uwvSrh5a8bw6zJKFmNYvKbeRdDrnjT";
-        // Relacion del resultado de la PCR con la dirección que se ha hecho la PCR
-        resultadosServicios[_direccionAsegurado].push(resultadoPcr);
-        // Devuelve el código respecto al resultado por aquella dirección
-        return resultadoPcr;
+    // Funcion para visualizar los resultados del servio solicitado por el asegurado
+    function VisualizarResultados(address _direccionAsegurado) public view returns (string memory _diagnostico, string memory _codigoIPFS) {
+        // Diagnostico del servicio
+        _diagnostico = ResultadosServiciosLab[_direccionAsegurado].diagnostico_servicio;
+        // Codigo IPFS del serviciop
+        _codigoIPFS = ResultadosServiciosLab[_direccionAsegurado].codigo_IPFS;
     }
     
-    // Funcion para ejecutar el servicio de radiografica (RX)
-      function RX(address _direccionAsegurado) private returns (string memory) {
-        // Se requiere que el servicio se haya dado de alta por el laboratorio 
-        require(serviciosLab["RX"].enFuncionamiento == true, "El servicio no esta en funcionamiento.");
-        // Codigo IPFS
-        string memory resultadorx = "QmPQv689v3no3Us8eARUtMuQySyLyoPv4w4ssD51jSMY1Z";
-        // Relacion del resultado de la RX con la dirección que se ha hecho la RX
-        resultadosServicios[_direccionAsegurado].push(resultadorx);
-        // Devuelve el código respecto al resultado por aquella dirección
-        return resultadorx;
-    }
+
 }
