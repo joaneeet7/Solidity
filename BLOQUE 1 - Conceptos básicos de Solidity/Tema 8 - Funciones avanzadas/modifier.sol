@@ -42,10 +42,9 @@ contract Modifier{
     
     
     //Ejemplo conduccion
-    mapping (uint => uint) age;
 
     modifier MayorEdad(uint _edadMinima, uint _edadUsuario) {
-      require (age[_edadUsuario] >= _edadMinima);
+      require (_edadUsuario >= _edadMinima);
       _;
     }
 
