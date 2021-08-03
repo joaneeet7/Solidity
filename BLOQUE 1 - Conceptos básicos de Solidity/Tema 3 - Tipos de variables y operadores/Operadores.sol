@@ -1,104 +1,57 @@
-pragma solidity ^0.4.0;
-
-
+//Indicando la version
+pragma solidity >=0.4.4 <0.7.0;
 
 contract Operadores{
     
-    /*
-    Operaodres aritmeticos
+    // Operadores matematicos
+    uint a = 32;
+    uint b = 4;
     
-    Suma: +
-    Resta: -
-    Multiplicacion: *
-    Division: /
-    Exponencial: **
-    Modulo: %
+    uint public suma = a+b;
+    uint public resta = a-b;
+    uint public division = a/b;
+    uint public multiplicacion = a*b;
+    uint public residuo = a%b;
+    uint public exponenciacion = a**b;
     
-    */
-    
-    uint a = 3245;
-    uint b = 1257;
-    uint q = a/b;
-    uint r = a%b;
-    
-    //Sabemos si dividimos a/b entonces a=b*q+r
+    //Comparar enteros
+    uint c = 3;
+    uint d = 3;
     
     
-    function test() public view returns(uint num){
-        return (b*q+r);
-    }
+    bool public test_1 = a>b;
+    bool public test_2 = a<b;
+    bool public test_3 = c==d;
+    bool public test_4 = a==d;
+    bool public test_5 = a!=b;
+    bool public test_6 = a>=b;
     
-    function test2()  public view returns(uint num){
-        return (a-b*q);
-    }
+    //Operadores booleanos
     
+    //Criterio de divisibilidad entre 5: si el numero termina en 0 o en 5
     
-    /*
-    Operadores booleanos
-    
-    Negacion !
-    And &&
-    Or ||
-    igualdad ==
-    inigualdad !=
-    
-    */
-    
-    //Ejemplo operador ==
-    function test3() public view returns(bool){
-        bool flag = false;
-        if(r==(a-b*q)){
-           flag=true;
-        }
-        return flag;
-    }
-    
-    //Ejemplo operador &&
-    
-    function test4() public view returns(bool){
-        bool flag = false;
-        uint d = a-b*q;
-        uint f = b*q+r;
+    function divisibilidad(uint _k) public pure returns(bool){
         
-        if((r==d) && (a==f)){
-            flag=true;
+        uint ultima_cifra = _k%10;
+        
+        if((ultima_cifra==0)||(ultima_cifra==5)){
+            return true;
+        }else{
+            return false;
         }
-        return flag;
+        
     }
     
-    //Criterio de divisibilidad entre 5: si el numero termina en 0 o en 1257
-    
-    //Ejemplo operador ||
-    function divisibleEnrte5(uint _num) public view returns(bool){
-        bool flag = false;
-        uint ultima_cifra = _num % 10;
-        if((ultima_cifra == 0) || (ultima_cifra ==5)){
-            flag = true;
+    function divisibilidadV2(uint _k) public pure returns(bool){
+        
+        uint ultima_cifra = _k%10;
+        
+        if((ultima_cifra!=0)&&(ultima_cifra!=5)){
+            return false;
+        }else{
+            return true;
         }
-        return flag;
     }
-    
-     function divisibleEnrte5V2(uint _num) public view returns(bool){
-        bool flag = true;
-        uint ultima_cifra = _num % 10;
-        if((ultima_cifra != 0) && (ultima_cifra !=5)){
-            flag = false;
-        }
-        return flag;
-    }
-    
-    /*
-    Comparaciones
-    Mayor o igual: >=
-    Menor o igual: <=
-    Mayor estricto: >
-    Menor estricto: <
-    Igualdad: ==
-    Inigualdad: !=
-    */
-    
     
     
 }
-
-

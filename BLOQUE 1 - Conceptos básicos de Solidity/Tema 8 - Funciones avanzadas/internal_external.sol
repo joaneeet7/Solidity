@@ -1,39 +1,41 @@
-pragma solidity >=0.4.4 <0.7.0;
+//Indicar la version
+pragma solidity >=0.4.4 0.7.0;
 
 contract Comida{
     
     struct plato{
-        string name;
+        string nombre;
         string ingredientes;
         uint tiempo;
     }
-    
+    //Declarar un array dinamico de platos
     plato [] platos;
-    mapping(string=>string) ingredientesPlatos;
+    //Relacionamos con un mapping el nombre del plato con sus ingredientes
+    mapping(string => string) ingredientes;
     
-    function NuevoPlato(string _nombre, string _ingredientes, uint _tiempo) internal{
+    //Funcion que nos permite dar de alta un nuevo plato 
+    function NuevoPlato(string memory _nombre, string memory _ingredientes, uint _tiempo) internal{
         platos.push(plato(_nombre, _ingredientes, _tiempo));
-        ingredientesPlatos[_nombre]=_ingredientes;
+        ingredientes[_nombre] = _ingredientes;
     }
     
-    function ingredientes(string _nombre) external view returns (string){
-        return ingredientesPlatos[_nombre];
-    } 
+    function Ingredientes(string memory _nombre) internal view returns(string memory){
+        return ingredientes[_nombre];
+    }
     
 }
 
-//https://www.youtube.com/watch?v=Ii4g38mPPlg
-
-
-contract Sandwich is Comida{
+contract Sandwitch is Comida{
     
-    
-    function sandwitch(string _ingredientes, uint _tiempo) public{
+    function sandwitch(string memory _ingredientes, uint _tiempo) external{
         NuevoPlato("Sandwitch", _ingredientes, _tiempo);
     }
     
-    function verIngredientes() public view returns(string){
-        return this.ingredientes("Sandwitch");
+    function verIngredientes() external view returns (string memory){
+        return Ingredientes("Sandwitch");
     }
     
+    
 }
+
+

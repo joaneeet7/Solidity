@@ -46,3 +46,5 @@ contract Cliente is Banco{
         return clientes[_nombre].dinero;
     }
 }
+
+
