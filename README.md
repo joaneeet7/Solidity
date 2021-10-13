@@ -4,9 +4,6 @@
 
 * Perfil de Udemy: https://www.udemy.com/user/joan-amengual-mesquida/
 
-* Canal de Discord de Blockchain: https://discord.gg/HYzWz8YHva
-
-
 # Curso de Smart Contracts y Blockchain de la A a la Z
 
 * ¿Quieres aprender a programar en el lenguaje que permite crear Smart Contracts?
