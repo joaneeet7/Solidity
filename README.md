@@ -4,7 +4,7 @@
 
 * Perfil de Udemy: https://www.udemy.com/user/joan-amengual-mesquida/
 
-* Cursos de Blockchain: https://jamengual150899.wixsite.com/joan-amengual
+* Cursos de Blockchain: https://joan-amengual.com
 
 # Curso de Smart Contracts y Blockchain de la A a la Z
 
