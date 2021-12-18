@@ -17,7 +17,7 @@ contract Eventos{
         emit nombre_evento2(_nombrePersona, _edad);
     }
     
-    function EmitirEvento3(string _nombrePersona, uint _edad) public{
+    function EmitirEvento3(string memory _nombrePersona, uint _edad) public{
         bytes32 hash_id = keccak256(abi.encodePacked(_nombrePersona, _edad, msg.sender)); 
         emit nombre_evento3(_nombrePersona, _edad, msg.sender, hash_id);
     }
