@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 //Especificamos la version
 pragma solidity >=0.4.4 <0.7.0;
 pragma experimental ABIEncoderV2;
