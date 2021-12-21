@@ -5,9 +5,9 @@ pragma experimental ABIEncoderV2;
 contract Mappings{
     
     //Declaramos un mapping para elegir un numero
-    mapping (address => uint) public ElegirNumero;
+    mapping (address => uint) public elegirNumero;
     
-    function elegirNumero(uint _numero) public{
+    function ElegirNumero(uint _numero) public{
         elegirNumero[msg.sender] = _numero;
     }
     
