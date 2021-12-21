@@ -7,7 +7,7 @@ contract Mappings{
     //Declaramos un mapping para elegir un numero
     mapping (address => uint) public elegirNumero;
     
-    function elegirNumero(uint _numero) public{
+    function ElegirNumero(uint _numero) public{
         elegirNumero[msg.sender] = _numero;
     }
     
@@ -18,11 +18,11 @@ contract Mappings{
     //Declaramos un mapping que relaciona el nombre de una persona con su cantidad de dinero
     mapping (string => uint) cantidadDinero;
     
-    function Dinero(string _nombre, uint _cantidad) public{
+    function Dinero(string memory _nombre, uint _cantidad) public{
         cantidadDinero[_nombre] = _cantidad;
     }
     
-    function consultarDinero(string _nombre) public view returns(uint){
+    function consultarDinero(string memory _nombre) public view returns(uint){
         return cantidadDinero[_nombre];
     }
     
@@ -34,7 +34,7 @@ contract Mappings{
     
     mapping(uint => Persona) personas;
     
-    function dni_Persona(uint _numeroDni, string _nombre, uint _edad) public{
+    function dni_Persona(uint _numeroDni, string memory _nombre, uint _edad) public{
         personas[_numeroDni] = Persona(_nombre, _edad);
     }
     

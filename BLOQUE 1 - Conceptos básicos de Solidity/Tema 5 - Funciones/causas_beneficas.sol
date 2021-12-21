@@ -22,7 +22,7 @@ contract causasBeneficas{
     
     //Esta funcion nos devuelve true en caso de que podamos donar a una causa y false en caso contrario
     
-    function objetivoCumplido(string _nombre, uint _donar) private view returns(bool){
+    function objetivoCumplido(string memory _nombre, uint _donar) private view returns(bool){
         
         bool flag = false;
         Causa memory causa = causas[_nombre];
@@ -36,7 +36,7 @@ contract causasBeneficas{
     
     
     //Esta funcion nos permite donar a una causa 
-    function donar(string _nombre, uint _cantidad) public returns(bool){
+    function donar(string memory _nombre, uint _cantidad) public returns(bool){
         
         bool aceptar_donacion=true;
         
@@ -49,7 +49,7 @@ contract causasBeneficas{
     }
     
     //Esta funcion nos dice si hemos llegado al precio objetivo 
-    function comprobar_causa(string _nombre) public view returns(bool, uint){
+    function comprobar_causa(string memory _nombre) public view returns(bool, uint){
         
         bool limite_alcanzado = false;
         Causa memory causa = causas[_nombre];
