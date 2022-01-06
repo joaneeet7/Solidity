@@ -39,7 +39,7 @@ contract Mappings{
         personas[_numeroDni] = Persona(_nombre, _edad);
     }
     
-    function VisualizarPersona(uint _dni) public view returns(Persona){
+    function VisualizarPersona(uint _dni) public view returns(Persona memory){
         return personas[_dni];
     }
     
