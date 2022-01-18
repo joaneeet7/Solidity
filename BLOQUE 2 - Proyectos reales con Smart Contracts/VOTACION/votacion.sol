@@ -139,3 +139,4 @@ contract votacion{
         }
         return ganador;
     }
+}
